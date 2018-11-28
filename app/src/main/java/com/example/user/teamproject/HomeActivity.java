@@ -10,6 +10,8 @@ import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceInfo;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
@@ -40,6 +42,13 @@ import com.couchbase.lite.MutableDocument;
 
 import org.ocpsoft.prettytime.PrettyTime;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -60,6 +69,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     FloatingActionButton fab;
     FloatingActionButton fab2;
 
+    static final int MESSAGE_READ =  1;
     WifiP2pManager mManager;
     WifiP2pManager.Channel mChannel;
     WiFiDirectBroadcastReceiver mReceiver;
@@ -67,6 +77,9 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
 
     String myUUID;
     String myUsername;
+
+    SendReceive sendReceive;
+    ServerClass serverClass;
 
 
     @Override
@@ -286,7 +299,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     }
 
     /**
-     * Registers a local service and then initiates a service discovery
+     * Registers a local service
      */
     private void startRegistration() {
         Intent intent = getIntent();
@@ -312,17 +325,22 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                 Toast.makeText(getApplicationContext(),"Failed to add service", Toast.LENGTH_SHORT).show();
             }
         });
+
+
     }
 
     @Override
     public void onConnectionInfoAvailable(WifiP2pInfo info) {
         if (info.groupFormed) {
             if (info.isGroupOwner) {
-                Intent intent = new Intent(getApplicationContext(), ChatterActivity.class);
-                WiFiP2pService service = new WiFiP2pService();
-                intent.putExtra("service", service);
-                intent.putExtra("deviceType", "groupOwner");
-                startActivity(intent);
+//                Intent intent = new Intent(getApplicationContext(), ChatterActivity.class);
+//                WiFiP2pService service = new WiFiP2pService();
+//                intent.putExtra("service", service);
+//                intent.putExtra("deviceType", "groupOwner");
+//                startActivity(intent);
+                serverClass = new ServerClass();
+                serverClass.start();
+                Toast.makeText(getApplicationContext(),"ServerClass created", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -338,4 +356,116 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         super.onPause();
         unregisterReceiver(mReceiver);
     }
+
+    private class SendReceive extends Thread {
+
+        private Socket socket;
+        private InputStream inputStream;
+        private OutputStream outputStream;
+
+        public SendReceive(Socket skt) {
+            socket = skt;
+            try {
+                inputStream = socket.getInputStream();
+                outputStream = socket.getOutputStream();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void run() {
+            byte[] buffer = new byte[1024];
+            int bytes;
+
+            while (socket != null) {
+                Log.d("SendReceiveCreated", "SendReceiveCreated");
+                try {
+                    bytes = inputStream.read(buffer);
+                    Log.d("SendReceiveBytesReceived", "Somethingreceived");
+
+                    if (bytes > 0) {
+                        handler.obtainMessage(MESSAGE_READ, bytes, -1, buffer).sendToTarget();
+                        Log.d("SendReceiveBytesReceived", "Somethingparsed");
+                    }
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        public void write(byte[] bytes) {
+            try {
+                outputStream.write(bytes);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
+    public class ServerClass extends Thread {
+        Socket socket;
+        ServerSocket serverSocket;
+
+        @Override
+        public void run() {
+            try {
+                serverSocket = new ServerSocket(8888);
+                socket = serverSocket.accept();
+                sendReceive = new HomeActivity.SendReceive(socket);
+                sendReceive.start();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
+
+    public class ClientClass extends Thread {
+
+        Socket socket;
+        String hostAdd;
+
+        public ClientClass(InetAddress hostAddress) {
+            hostAdd = hostAddress.getHostAddress();
+            socket = new Socket();
+        }
+
+        @Override
+        public void run() {
+            try {
+                socket.connect(new InetSocketAddress(hostAdd, 8888), 500);
+                sendReceive = new HomeActivity.SendReceive(socket);
+                sendReceive.start();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
+    Handler handler = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(Message msg) {
+            switch (msg.what) {
+                case MESSAGE_READ:
+                    byte[] readBuff = (byte[]) msg.obj;
+                    String tempMsg = new String(readBuff, 0, msg.arg1);
+                    Toast.makeText(getApplicationContext(), tempMsg, Toast.LENGTH_LONG).show();
+                    ChatModel model = new ChatModel(tempMsg, false);
+                    Toast.makeText(getApplicationContext(), "MessageReceived", Toast.LENGTH_SHORT).show();
+                    // TODO: add to chat database
+
+                    Intent intent = new Intent(getApplicationContext(), ChatterActivity.class);
+                    WiFiP2pService service = new WiFiP2pService();
+                    intent.putExtra("service", service);
+                    intent.putExtra("deviceType", "client");
+                    startActivity(intent);
+                    break;
+            }
+            return true;
+        }
+    });
 }
