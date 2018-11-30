@@ -49,9 +49,9 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
             int state = intent.getIntExtra(WifiP2pManager.EXTRA_WIFI_STATE, -1);
             if (state == WifiP2pManager.WIFI_P2P_STATE_ENABLED) {
                 // TODO: Remove unnecessary toasts
-                Toast.makeText(context, "Wifi is On", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(context, "Wifi is On", Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(context, "Wifi is Off", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(context, "Wifi is Off", Toast.LENGTH_SHORT).show();
             }
         } else if (WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION.equals(action)) {
             if (mManager != null) {
@@ -71,19 +71,19 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
                     if (networkInfo.isConnected()) {
                         mManager.requestConnectionInfo(mChannel, (WifiP2pManager.ConnectionInfoListener) userDiscoveryActivity);
                     } else {
-                        Toast.makeText(userDiscoveryActivity.getApplicationContext(), "Disconnected", Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(userDiscoveryActivity.getApplicationContext(), "Disconnected", Toast.LENGTH_SHORT).show();
                     }
                 } else if (chatActivity != null) {
                     if (networkInfo.isConnected()) {
                         mManager.requestConnectionInfo(mChannel, (WifiP2pManager.ConnectionInfoListener) chatActivity);
                     } else {
-                        Toast.makeText(chatActivity.getApplicationContext(), "Disconnected", Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(chatActivity.getApplicationContext(), "Disconnected", Toast.LENGTH_SHORT).show();
                     }
                 } else if (homeActivity != null) {
                     if (networkInfo.isConnected()) {
                         mManager.requestConnectionInfo(mChannel, (WifiP2pManager.ConnectionInfoListener) homeActivity);
                     } else {
-                        Toast.makeText(homeActivity.getApplicationContext(), "Disconnected", Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(homeActivity.getApplicationContext(), "Disconnected", Toast.LENGTH_SHORT).show();
                     }
                 }
             } else {

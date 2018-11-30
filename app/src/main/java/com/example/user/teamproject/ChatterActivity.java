@@ -281,6 +281,8 @@ public class ChatterActivity extends AppCompatActivity implements WifiP2pManager
 //                        }
                     } catch (CouchbaseLiteException e) {
                         e.printStackTrace();
+                    } catch (IllegalArgumentException e) {
+                        e.printStackTrace();
                     }
 
                 } catch (JSONException e) {
@@ -406,14 +408,14 @@ public class ChatterActivity extends AppCompatActivity implements WifiP2pManager
                 @Override
                 public void onSuccess() {
                     Toast toast = Toast.makeText(getApplicationContext(), "Connection Request Successful", Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 0);
+//                    toast.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 0);
                     toast.show();
                 }
 
                 @Override
                 public void onFailure(int reason) {
                     Toast toast = Toast.makeText(getApplicationContext(), "Connection Request Unsuccessful", Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 0);
+//                    toast.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 0);
                     toast.show();
                 }
             });
@@ -634,11 +636,11 @@ public class ChatterActivity extends AppCompatActivity implements WifiP2pManager
                                         userListDatabase.save(friendDoc);
                                         Toast toast = Toast.makeText(ChatterActivity.this, "friendList added", Toast.LENGTH_LONG);
                                         toast.setGravity(Gravity.TOP|Gravity.CENTER_HORIZONTAL, 0, 0);
-                                        toast.show();
+//                                        toast.show();
                                     }else{
                                         Toast toast = Toast.makeText(ChatterActivity.this, "friendList added already", Toast.LENGTH_LONG);
                                         toast.setGravity(Gravity.TOP|Gravity.CENTER_HORIZONTAL, 0, 0);
-                                        toast.show();
+//                                        toast.show();
                                     }
                                 } catch (CouchbaseLiteException e) {
                                     e.printStackTrace();

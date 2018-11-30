@@ -20,10 +20,12 @@ import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.Gravity;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -46,6 +48,7 @@ import com.google.android.gms.vision.text.TextRecognizer;
 import java.io.IOException;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.Manifest.permission_group.CAMERA;
 
 
 /**
@@ -61,7 +64,8 @@ public class ARActivity extends AppCompatActivity implements SensorEventListener
     TextView distance;
     TextView targetDirection;
     CameraSource cameraSource;
-    final int REQUEST_CAMERA_PERMISSION_ID = 1001;
+    final int REQUEST_CAMERA_PERMISSION_ID = 1;
+    final int MY_PERMISSIONS_REQUEST_GPS_PROVIDER = 1;
 
     private static SensorManager sensorManager;
     private Sensor sensor;
@@ -80,22 +84,28 @@ public class ARActivity extends AppCompatActivity implements SensorEventListener
     private Location myLocation = new Location("me");
     private Location target = new Location("target");
 
-    public void OnRequestPermissionsResultCallback(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResult) {
-        switch (requestCode) {
-            case REQUEST_CAMERA_PERMISSION_ID:
-                if (grantResult[0] == PackageManager.PERMISSION_GRANTED) {
-                    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                        return;
-                    }
-                    try {
-                        cameraSource.start(cameraView.getHolder());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
 
-                }
-        }
-    }
+//    public void OnRequestPermissionsResultCallback(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResult) {
+//        switch (requestCode) {
+//            case REQUEST_CAMERA_PERMISSION_ID:
+//                if (grantResult[0] != PackageManager.PERMISSION_GRANTED) {
+//
+//                    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+//                        ActivityCompat.requestPermissions(this,
+//                                new String[]{Manifest.permission.CAMERA},
+//                                REQUEST_CAMERA_PERMISSION_ID);
+//                    }
+//                    try {
+//                        cameraSource.start(cameraView.getHolder());
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
+//
+//                }else{
+//                    Toast.makeText(this, "camera permission grant", Toast.LENGTH_SHORT).show();
+//                }
+//        }
+//    }show
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -104,6 +114,14 @@ public class ARActivity extends AppCompatActivity implements SensorEventListener
 
         context = this;
         ActivityCompat.requestPermissions(this, new String[]{ACCESS_FINE_LOCATION}, 1);
+
+//        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+        ActivityCompat.requestPermissions(this, new String[]{CAMERA}, 1);
+            // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+            // app-defined int constant. The callback method gets the
+            // result of the request.
+
+//        }
 
         // Binding the views
         cameraView = (SurfaceView) findViewById(R.id.surface_view);
@@ -204,6 +222,9 @@ public class ARActivity extends AppCompatActivity implements SensorEventListener
                 myLat = location.getLatitude();
                 myLon = location.getLongitude();
                 myLocation = location;
+                Toast toast = Toast.makeText(getApplicationContext(), "Location Changing", Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP|Gravity.CENTER_HORIZONTAL, 0, 0);
+                toast.show();
                 distance.setText(calculateDistance(myLat, myLon, doubleTargetLat, doubleTargetLon));
             }
 
@@ -222,10 +243,22 @@ public class ARActivity extends AppCompatActivity implements SensorEventListener
 
             }
         };
+
+//        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED){
+//            ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION_ID);
+//        }
+
+//        if (ContextCompat.checkSelfPermission(this, LocationManager.GPS_PROVIDER) != PackageManager.PERMISSION_GRANTED) {
+//            ActivityCompat.requestPermissions(this, new String[]{LocationManager.GPS_PROVIDER}, MY_PERMISSIONS_REQUEST_GPS_PROVIDER);
+//        } else {
         locationManager.requestLocationUpdates( LocationManager.GPS_PROVIDER,
                 1000,
                 1, locationListenerGPS);
         isLocationEnabled();
+//        }
+
+
+
 
         // Setup orientation sensor
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -273,7 +306,7 @@ public class ARActivity extends AppCompatActivity implements SensorEventListener
         if (sensor != null) {
             sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_GAME);
         } else {
-            Toast.makeText(this, "Not supported", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(this, "Not supported", Toast.LENGTH_SHORT).show();
         }
 
         isLocationEnabled();
@@ -405,8 +438,10 @@ public class ARActivity extends AppCompatActivity implements SensorEventListener
                 * Math.sin(dLon/2) * Math.sin(dLon/2);
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         double d = 6371 * c * 1000;
-        return String.format("%.2f", d) + "m";
 
+        Toast.makeText(getApplicationContext(), Double.toString(myLat) + ";" + Double.toString(myLon), Toast.LENGTH_SHORT);
+
+        return String.format("%.2f", d) + "m";
     }
 
 //    private String calculateDirection(double lat1, double lon1, double lat2, double lon2) {

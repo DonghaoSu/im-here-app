@@ -284,12 +284,12 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         mManager.addLocalService(mChannel, service, new WifiP2pManager.ActionListener() {
             @Override
             public void onSuccess() {
-                Toast.makeText(getApplicationContext(), "Successfully added " + myUUID, Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getApplicationContext(), "Successfully added " + myUUID, Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onFailure(int error) {
-                Toast.makeText(getApplicationContext(), "Failed to add service", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getApplicationContext(), "Failed to add service", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -309,7 +309,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             int size = rs.allResults().size();
             Toast toast = Toast.makeText(HomeActivity.this, "friendList size:" + size, Toast.LENGTH_LONG);
             toast.setGravity(Gravity.TOP|Gravity.CENTER_HORIZONTAL, 0, 0);
-            toast.show();
+//            toast.show();
 
             for(int i = 0; i < size; i++) {
                 rs = query.execute();

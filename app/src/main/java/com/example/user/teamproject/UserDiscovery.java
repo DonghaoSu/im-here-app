@@ -100,14 +100,14 @@ public class UserDiscovery extends AppCompatActivity implements WifiP2pManager.C
                         public void onSuccess() {
                             Toast toast = Toast.makeText(getApplicationContext(), "Previous Group successfully removed", Toast.LENGTH_SHORT);
                             toast.setGravity(Gravity.TOP|Gravity.CENTER_HORIZONTAL, 0, 0);
-                            toast.show();
+//                            toast.show();
                         }
 
                         @Override
                         public void onFailure(int reason) {
                             Toast toast = Toast.makeText(getApplicationContext(), "Failed to remove group: " + reason, Toast.LENGTH_SHORT);
                             toast.setGravity(Gravity.TOP|Gravity.CENTER_HORIZONTAL, 0, 0);
-                            toast.show();
+//                            toast.show();
                         }
                     });
                 } else {
